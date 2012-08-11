@@ -8,8 +8,6 @@ There I call Adobe Workers as Bundlers in OSGI. Because its more hightlevel conc
 Example
 =======
 
-'''actionscript
-
 //Create Bundle Bridge Builder
 
 //One side
@@ -43,5 +41,3 @@ bridge.onInvoke("three", function(response : BundleResponse) : void{
 	response.getParam("some param name");
 	response.getParam("another param name");
 });
-
-'''
