@@ -1,17 +1,43 @@
 package org.hyzhak.onworkers
 {
 	import org.hyzhak.onworkers.workers.WorkerBridgeBuilder;
+	import org.hyzhak.onworkers.workers.WorkerBridgesCore;
 
 	public class BundleBridges
 	{
-		public static function get isPrimordial() : Boolean
+		private static var _cores : Object = {};
+		
+		//--------------------------------------------------------------------------
+		//
+		//  Public.Methods
+		//
+		//--------------------------------------------------------------------------
+		
+		public static function onWorkers() : BundleBridgesCore
 		{
-			return WorkerBridgeBuilder.isPrimordial;
+			return getInstance(WorkerBridgesCore);
 		}
 		
-		public static function onWorkers() : WorkerBridgeBuilder
+		public static function onSharedEvents() : BundleBridgesCore
 		{
-			return new WorkerBridgeBuilder();
+			throw new Error("TODO : doesn't implement yet. ");
+			return getInstance(null);
+		}
+		
+		//--------------------------------------------------------------------------
+		//
+		//  Private.Methods
+		//
+		//--------------------------------------------------------------------------
+		
+		private static function getInstance(keyClass : Class) : BundleBridgesCore
+		{
+			if(_cores[keyClass] == null)
+			{
+				_cores[keyClass] = new keyClass;
+			}
+			
+			return _cores[keyClass];
 		}
 	}
 }

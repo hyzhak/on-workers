@@ -17,12 +17,7 @@ package org.hyzhak.onworkers.workers
 		private var targetWorker : Worker;
 		private var toMainBundle:Boolean;
 		private var startTargetWorker:Boolean;
-		
-		public static function get isPrimordial() : Boolean
-		{
-			return Worker.current.isPrimordial;
-		}
-		
+				
 		public function buildBridge():BundleBridge
 		{
 			if(toMainBundle)
@@ -47,7 +42,32 @@ package org.hyzhak.onworkers.workers
 			return new WorkerBridge()
 				.targetToSender(channalTargetToCurrent)
 				.senderToTarget(channalCurrentToTarget);
+		}		
+		
+		public function fromCurrent() : BundleBridgeBuilder
+		{
+			currentWorker = Worker.current;
+			return this;
 		}
+		
+		public function toMain() : BundleBridgeBuilder
+		{
+			toMainBundle = true;
+			return this;
+		}
+		
+		public function toNewBundleFromBytes(bytes : ByteArray) : BundleBridgeBuilder
+		{
+			targetWorker = WorkerDomain.current.createWorker(bytes);
+			startTargetWorker = true;
+			return this;
+		}
+		
+		//--------------------------------------------------------------------------
+		//
+		//  Public.Methods
+		//
+		//--------------------------------------------------------------------------
 		
 		public function from(worker : Worker) : WorkerBridgeBuilder
 		{
@@ -55,28 +75,9 @@ package org.hyzhak.onworkers.workers
 			return this;
 		}
 		
-		public function fromCurrent() : WorkerBridgeBuilder
-		{
-			currentWorker = Worker.current;
-			return this;
-		}
-		
 		public function to(worker : Worker) : WorkerBridgeBuilder
 		{
 			targetWorker = worker;
-			return this;
-		}
-		
-		public function toMain() : WorkerBridgeBuilder
-		{
-			toMainBundle = true;
-			return this;
-		}
-		
-		public function toNewBundleFromBytes(bytes : ByteArray) : WorkerBridgeBuilder
-		{
-			targetWorker = WorkerDomain.current.createWorker(bytes);
-			startTargetWorker = true;
 			return this;
 		}
 	}
