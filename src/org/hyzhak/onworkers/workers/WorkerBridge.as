@@ -4,6 +4,7 @@ package org.hyzhak.onworkers.workers
 	import flash.system.MessageChannel;
 	import flash.system.Worker;
 	
+	import org.hyzhak.onworkers.BridgeExtension;
 	import org.hyzhak.onworkers.BundleBridge;
 	import org.hyzhak.onworkers.BundleInvoke;
 	import org.hyzhak.onworkers.BundleResponse;
@@ -44,7 +45,6 @@ package org.hyzhak.onworkers.workers
 			handlers[name] = handler;
 			return this;
 		}
-		
 		//--------------------------------------------------------------------------
 		//
 		//  Private.Methods

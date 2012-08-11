@@ -7,5 +7,7 @@ package org.hyzhak.onworkers
 		function get isPrimordial() : Boolean;
 		
 		function newBundleBridgeBuilder() : BundleBridgeBuilder;
+		
+		function registrateExtension(extension : BridgeExtension) : BundleBridgesCore;
 	}
 }
