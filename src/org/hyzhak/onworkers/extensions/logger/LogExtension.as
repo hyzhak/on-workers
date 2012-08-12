@@ -110,8 +110,8 @@ package org.hyzhak.onworkers.extensions.logger
 			}
 			
 			bundleBridge.invoke(LOG)
-				.withParam(LEVEL, level)
-				.withParam(MESSAGE, message);
+				.param(LEVEL, level)
+				.param(MESSAGE, message);
 		}
 	}
 }

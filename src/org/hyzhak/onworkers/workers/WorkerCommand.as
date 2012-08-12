@@ -32,7 +32,7 @@ package org.hyzhak.onworkers.workers
 			// TODO Auto Generated method stub
 		}
 		
-		public function withParam(key : String, value:*):BundleInvoke
+		public function param(key : String, value:*):BundleInvoke
 		{
 			args[key] = value;
 			return this;
