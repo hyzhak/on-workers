@@ -4,6 +4,7 @@ package org.hyzhak.onworkers.workers
 	import flash.events.TimerEvent;
 	import flash.system.MessageChannel;
 	import flash.system.MessageChannelState;
+	import flash.utils.ByteArray;
 	import flash.utils.Timer;
 	import flash.utils.setTimeout;
 	
@@ -21,6 +22,8 @@ package org.hyzhak.onworkers.workers
 		
 		private var timer:Timer;
 		
+		private var bridge : WorkerBridge;
+		
 		//--------------------------------------------------------------------------
 		//
 		//  BundleInvoke
@@ -37,6 +40,19 @@ package org.hyzhak.onworkers.workers
 			args[key] = value;
 			return this;
 		}
+		
+		public function shareBytes(bytes:ByteArray, key : String = ""):BundleInvoke
+		{
+			bridge.shareBytes(message, key, bytes);
+			return this;
+		}
+		
+		
+		//--------------------------------------------------------------------------
+		//
+		//  Private.Methods
+		//
+		//--------------------------------------------------------------------------
 		
 		private function lazyRun():void
 		{
@@ -57,12 +73,6 @@ package org.hyzhak.onworkers.workers
 			timer.removeEventListener(TimerEvent.TIMER_COMPLETE, onTimer);
 			run();
 		}
-		
-		//--------------------------------------------------------------------------
-		//
-		//  Private.Methods
-		//
-		//--------------------------------------------------------------------------
 		
 		private function run():void
 		{
@@ -93,6 +103,12 @@ package org.hyzhak.onworkers.workers
 		{
 			//TODO : wait response from recivers
 			fromChannel = channel;
+			return this;
+		}
+		
+		internal function setBridge(value : WorkerBridge) : WorkerCommand
+		{
+			bridge = value;
 			return this;
 		}
 	}

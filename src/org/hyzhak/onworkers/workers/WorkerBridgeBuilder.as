@@ -1,5 +1,6 @@
 package org.hyzhak.onworkers.workers
 {
+	import flash.events.Event;
 	import flash.system.MessageChannel;
 	import flash.system.Worker;
 	import flash.system.WorkerDomain;
@@ -20,10 +21,25 @@ package org.hyzhak.onworkers.workers
 				
 		public function buildBridge():BundleBridge
 		{
+			var bytes : ByteArray;
+			var sharedPropertyWorker : Worker;
 			if(toMainBundle)
 			{
 				channalCurrentToTarget = currentWorker.getSharedProperty(TARGET_TO_CURRENT);
 				channalTargetToCurrent = currentWorker.getSharedProperty(CURRENT_TO_TARGET);
+				
+				bytes = new ByteArray();
+				bytes.shareable = true;
+				
+				currentWorker.setSharedProperty("testbytes", bytes);
+				if(bytes != null)
+				{
+					bytes.position = 0;
+					bytes.writeObject("hello");
+					channalCurrentToTarget.send("testbytes");
+				}
+				
+				sharedPropertyWorker = currentWorker;
 			}
 			else
 			{
@@ -33,15 +49,30 @@ package org.hyzhak.onworkers.workers
 				targetWorker.setSharedProperty(TARGET_TO_CURRENT, channalTargetToCurrent);
 				targetWorker.setSharedProperty(CURRENT_TO_TARGET, channalCurrentToTarget);
 				
+				channalTargetToCurrent.addEventListener(Event.CHANNEL_MESSAGE, function(event : Event) : void {
+					var localBytes : ByteArray = targetWorker.getSharedProperty("testbytes");
+					localBytes.position = 0;
+					trace("testbytes",localBytes.bytesAvailable);
+					trace("bytes.shareable", localBytes.shareable);
+					if(localBytes.bytesAvailable>0)
+					{
+						var object : Object = localBytes.readObject();
+						trace("testbytes", object);
+					}
+				});
+				
 				if(startTargetWorker)
 				{
 					targetWorker.start();
 				}
+				
+				sharedPropertyWorker = targetWorker;
 			}
 			
 			return new WorkerBridge()
 				.targetToSender(channalTargetToCurrent)
-				.senderToTarget(channalCurrentToTarget);
+				.senderToTarget(channalCurrentToTarget)
+				.setSharedPropertyWorker(sharedPropertyWorker);
 		}		
 		
 		public function fromCurrent() : BundleBridgeBuilder

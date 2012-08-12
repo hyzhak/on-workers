@@ -6,7 +6,7 @@ package org.hyzhak.onworkers.extensions.logger
 	import org.hyzhak.onworkers.BundleBridge;
 	import org.hyzhak.onworkers.BundleResponse;
 	
-	public class LogExtension implements BridgeExtension
+	public class LogExtension implements BridgeExtension, Logger
 	{
 		private static const LOG : String = "log-special-method";
 		
@@ -59,18 +59,14 @@ package org.hyzhak.onworkers.extensions.logger
 		//
 		//--------------------------------------------------------------------------
 		
-		public function error(message:String, ... rest):LogExtension
+		public function error(message:String, ... rest):void
 		{
 			sendLog(LogLevel.ERROR, message + " " + rest.join(" "));
-			
-			return this;
 		}
 		
-		public function info(message:String, ... rest):LogExtension
+		public function info(message:String, ... rest):void
 		{
 			sendLog(LogLevel.INFO, message + " " + rest.join(" "));
-			
-			return this;
 		}
 		
 		public function onLog(handler:Function):LogExtension

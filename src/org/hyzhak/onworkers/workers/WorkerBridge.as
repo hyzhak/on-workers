@@ -3,6 +3,7 @@ package org.hyzhak.onworkers.workers
 	import flash.events.Event;
 	import flash.system.MessageChannel;
 	import flash.system.Worker;
+	import flash.utils.ByteArray;
 	
 	import org.hyzhak.onworkers.BridgeExtension;
 	import org.hyzhak.onworkers.BundleBridge;
@@ -11,7 +12,7 @@ package org.hyzhak.onworkers.workers
 
 	public class WorkerBridge implements BundleBridge
 	{
-		private var senderBridge:Worker;
+		private var sharedPropertyWorker:Worker;
 		
 		private var channelSenderToTarget : MessageChannel;
 		private var channelTargetToSender : MessageChannel;
@@ -19,6 +20,8 @@ package org.hyzhak.onworkers.workers
 		private var isListenTarget:Boolean;
 		
 		private var handlers:Object = {};
+		
+		private var sharedBytes:Object = {};
 		
 		//--------------------------------------------------------------------------
 		//
@@ -34,9 +37,7 @@ package org.hyzhak.onworkers.workers
 			trace("invoke", name);
 			
 			return buildCommand()
-				.invoke(name)
-				.at(channelSenderToTarget)
-				.listen(channelTargetToSender);
+				.invoke(name);
 		}
 		
 		public function onInvoke(name:String, handler : Function):BundleBridge
@@ -53,7 +54,10 @@ package org.hyzhak.onworkers.workers
 		
 		private function buildCommand():WorkerCommand
 		{
-			return new WorkerCommand();
+			return new WorkerCommand()
+				.at(channelSenderToTarget)
+				.listen(channelTargetToSender)
+				.setBridge(this);
 		}
 		
 		private function startListen() : void
@@ -96,11 +100,14 @@ package org.hyzhak.onworkers.workers
 				{
 					handler.call(null, 
 						buildResponce()
-							.setParams(channelTargetToSender.receive() as Object));
+							.setParams(channelTargetToSender.receive() as Object)
+							.setMessage(msg)
+							.setBridge(this)
+					);
 				}
 				catch(e : Error)
 				{
-					
+					return;
 				}
 			}
 		}
@@ -108,6 +115,44 @@ package org.hyzhak.onworkers.workers
 		private function buildResponce():WorkerRespose
 		{
 			return new WorkerRespose();
+		}
+		
+		internal function shareBytes(message : String, key : String, bytes : ByteArray) : void
+		{
+			var fullSharedKey : String = WorkerUtil.getSharedBytesName("", message, key);
+			
+			if(bytes == null || sharedBytes[fullSharedKey] != null)
+			{
+				return;
+			}
+			
+			sharedBytes[fullSharedKey] = bytes;
+			
+			bytes.shareable = true;
+			
+			sharedPropertyWorker.setSharedProperty(fullSharedKey, bytes);
+		}
+		
+		internal function getSharedBytes(message : String, key : String) : ByteArray
+		{
+			var fullSharedKey : String = WorkerUtil.getSharedBytesName("", message, key);
+			
+			if(sharedBytes[fullSharedKey] != null)
+			{
+				return sharedBytes[fullSharedKey];
+			}
+			
+			var bytes : ByteArray = sharedPropertyWorker.getSharedProperty(fullSharedKey);
+			
+			sharedBytes[fullSharedKey] = bytes;
+			
+			return bytes;
+		}
+		
+		internal function setSharedPropertyWorker(value : Worker) : WorkerBridge
+		{
+			sharedPropertyWorker = value;
+			return this;
 		}
 		
 		internal function senderToTarget(value : MessageChannel) : WorkerBridge
